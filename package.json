@@ -8,13 +8,15 @@
   "author": "Davi Lorena",
   "license": "ISC",
   "description": "API para gerenciar tarefas",
-  "dependencies": {
-    "express": "^5.1.0"
-  },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-async-errors": "^3.1.1",
+    "zod": "^4.1.8"
   }
 }
