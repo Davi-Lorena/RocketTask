@@ -7,3 +7,106 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum userRole {
+  member
+  admin
+}
+
+enum Status {
+  pending
+  in_progress
+  completed
+}
+
+enum Priority {
+  high
+  medium
+  low
+}
+
+model User {
+id String @unique @default(uuid())
+name String 
+email String @unique
+password String
+
+role userRole @default(member)
+
+
+createdAt DateTime @default(now()) @map("created_at")
+updatedAt DateTime @default(now()) @map("updated_at")
+
+team TeamMembers[]
+task Tasks[]
+taskHistory TaskHistory[]
+
+@@map("users")
+}
+
+
+model Teams {
+id String @unique @default(uuid())
+name String
+description String
+
+createdAt DateTime @default(now()) @map("created_at")
+updatedAt DateTime @default(now()) @map("updated_at")
+
+teamMember TeamMembers[]
+task Tasks[]
+
+@@map("teams")
+}
+
+model TeamMembers {
+id String @unique @default(uuid())
+
+userId String @map("user_id")
+user User @relation(fields: [userId], references: [id])
+
+teamId String @map("team_id")
+team Teams @relation(fields: [teamId], references: [id])
+
+createdAt DateTime @default(now()) @map("created_at")
+
+@@map("team_members")
+}
+
+model Tasks {
+  id String @unique @default(uuid())
+  title String
+  description String
+  status Status @default(pending)
+  priority Priority @default(high)
+
+  assignedTo String @map("assigned_to")
+  user User @relation(fields: [assignedTo], references: [id])
+
+teamId String @map("team_id")
+team Teams @relation(fields: [teamId], references: [id])
+
+createdAt DateTime @default(now()) @map("created_at")
+updatedAt DateTime @default(now()) @map("updated_at")
+
+taskHistory TaskHistory[]
+
+@@map("tasks")
+}
+
+model TaskHistory {
+id String @unique @default(uuid())
+
+taskId String @map("task_id")
+task Tasks @relation(fields: [taskId], references: [id])
+
+changedBy String @map("changed_by")
+user User @relation(fields: [changedBy], references: [id])
+
+oldStatus Status @map("old_status")
+newStatus Status @map("new_status")
+
+changedAt DateTime @default(now()) @map("changed_at")
+
+@@map("tasks_history")
+}
