@@ -2,6 +2,8 @@ import { Request, Response } from "express"
 import { z } from "zod"
 import { prisma } from "@/database/prisma";
 import { userRole } from "@/generated/prisma";
+import { hash } from "bcrypt";
+import { AppError } from "@/utils/AppError";
 
 class UsersController {
 
@@ -16,10 +18,26 @@ role: z.enum([userRole.member, userRole.admin]).default(userRole.member)
 
 })
 
-const { name, email, password } = bodySchema.parse(req.body)
+const { name, email, password, role } = bodySchema.parse(req.body)
 
+const userWithSameEmail = await prisma.user.findFirst({where: {email}})
 
-    res.json({name, email, password })
+if(userWithSameEmail) {
+throw new AppError("This email already be used!")
+}
+
+const hashedPassword = await hash(password, 8)
+
+await prisma.user.create({
+    data: { 
+    name,
+    email,
+    password: hashedPassword,
+    role
+    }
+})
+
+    res.status(201).json()
 }
 
 
