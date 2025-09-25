@@ -27,8 +27,7 @@ if(!passwordMatch) {
     throw new AppError("E-mail ou senha inválidos!")
 }
 
-
-
+res.json({message: "OK"})
 
 }
 
