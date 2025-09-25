@@ -3,6 +3,8 @@ import { z } from "zod"
 import { prisma } from "@/database/prisma";
 import { AppError } from "@/utils/AppError";
 import { compare } from "bcrypt";
+import { authConfig } from "@/configs/auth";
+import { sign } from "jsonwebtoken";
 
 class SessionsController {
 
@@ -15,22 +17,31 @@ const bodySchema = z.object({
 
 const { email, password } = bodySchema.parse(req.body)
 
-const userEmail = await prisma.user.findUnique({where: {email}})
+const user = await prisma.user.findUnique({where: {email}})
 
-if(!userEmail) {
+if(!user) {
     throw new AppError("E-mail ou senha inválidos!")
 }
 
-const passwordMatch = await compare(password, userEmail.password)
+const passwordMatch = await compare(password, user.password)
 
 if(!passwordMatch) {
     throw new AppError("E-mail ou senha inválidos!")
 }
 
-res.json({message: "OK"})
+const {secret, expiresIn} = authConfig.jwt
 
+const token = sign({user: user.role}, secret, {
+    subject: user.id,
+    expiresIn
+})
+
+const { password: _, ...userWithoutPassword} = user
+
+    res.json({token, user: userWithoutPassword})
 }
 
 }
+
 
 export { SessionsController }
