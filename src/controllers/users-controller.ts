@@ -91,6 +91,23 @@ const data: any = { name, email, role };
 
 }
 
+async delete(req: Request, res: Response) {
+
+const userId = req.params.id
+
+const user = await prisma.user.findUnique({where: {id: userId}})
+
+if(!user) {
+    throw new AppError("User not Found", 404)
+}
+
+await prisma.user.delete({
+    where: {id: userId}
+})
+
+    res.status(204).json()
+}
+
 }
 
 export { UsersController };
