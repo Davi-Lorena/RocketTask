@@ -40,6 +40,11 @@ await prisma.user.create({
     res.status(201).json()
 }
 
+async index(req: Request, res: Response) {
+const users = await prisma.user.findMany()
+
+res.json({ users })
+}
 
 }
 
