@@ -78,6 +78,7 @@ const {name, email, password, role} = bodySchema.parse(req.body)
   }
 
 const data: any = { name, email, role };
+
   if (password) {
     data.password = await hash(password, 8);
   }
