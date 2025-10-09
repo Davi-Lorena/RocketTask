@@ -15,6 +15,7 @@ function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
         
 const authorization = req.headers.authorization
 
+
 if(!authorization) {
     throw new AppError("Não há token JWT!")
 }

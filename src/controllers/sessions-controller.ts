@@ -31,7 +31,7 @@ if(!passwordMatch) {
 
 const {secret, expiresIn} = authConfig.jwt
 
-const token = sign({user: user.role}, secret, {
+const token = sign({role: user.role}, secret, {
     subject: user.id,
     expiresIn
 })
