@@ -32,6 +32,21 @@ async create(req: Request, res: Response) {
     res.status(201).json({name, description})
 }
 
+async index(req: Request, res: Response) {
+
+    const teams = await prisma.teams.findMany()
+    
+  const teamsWithDescription = teams.map(team => {
+    
+            const teamData = { ...team } as any
+        if (teamData.description === null) {
+            delete teamData.description
+        }
+        return teamData
+    })
+
+    res.json(teamsWithDescription)
+}
 
 }
 
