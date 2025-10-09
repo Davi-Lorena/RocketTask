@@ -49,7 +49,7 @@ res.json({ users })
 async update(req: Request, res: Response) {
 
     const bodySchema = z.object({
-name: z.string().min(3, {message: "Min 6 characters"}).max(100, {message: "Max 100 characters"}).trim(),
+name: z.string().trim().min(3, {message: "Min 6 characters"}).max(100, {message: "Max 100 characters"}),
 email: z.string().trim().email({ message: "e-mail is required"}).toLowerCase(),
 password: z.string().trim().min(6, {message: "min 6 characters"}),
 role: z.enum([userRole.member, userRole.admin]).default(userRole.member)
@@ -57,15 +57,16 @@ role: z.enum([userRole.member, userRole.admin]).default(userRole.member)
 
 const userId = req.params.id 
 
+const user = await prisma.user.findUnique({
+  where: { id: userId },
+});
+
+if (!user) {
+  throw new AppError("User not found!", 404);
+}
+
 const {name, email, password, role} = bodySchema.parse(req.body)
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
-  if (!user) {
-    throw new AppError("User not found!", 404);
-  }
 
   if (email) { 
     const userWithSameEmail = await prisma.user.findUnique({
