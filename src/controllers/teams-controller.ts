@@ -34,18 +34,41 @@ async create(req: Request, res: Response) {
 
 async index(req: Request, res: Response) {
 
-    const teams = await prisma.teams.findMany()
-
-  const teamsWithDescription = teams.map(team => {
-    
-            const teamData = { ...team } as any
-        if (teamData.description === null) {
-            delete teamData.description
+    const teams = await prisma.teams.findMany({
+        include: {
+            teamMember: {
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                            email: true
+                        }
+                    }
+                }
+            }
         }
-        return teamData
     })
 
-    res.json(teamsWithDescription)
+  const teamsWithMember = teams.map(team => {
+    
+            const teamData = { ...team } as any
+
+teamData.teamMember = team.teamMember.map(member => {
+    const { user, ...memberData } = member
+    
+    return {
+        name: user.name,
+        email: user.email,
+        ...memberData,
+    }
+})
+if (teamData.description === null) {
+ delete teamData.description
+ }
+ return teamData
+ })
+
+res.json({teams: teamsWithMember})
 }
 
 async update(req: Request, res: Response) {
