@@ -49,41 +49,47 @@ res.json({ users })
 async update(req: Request, res: Response) {
 
     const bodySchema = z.object({
-name: z.string().min(3, {message: "Min 6 characters"}).max(100, {message: "Max 100 characters"}).trim(),
+name: z.string().trim().min(3, {message: "Min 6 characters"}).max(100, {message: "Max 100 characters"}),
 email: z.string().trim().email({ message: "e-mail is required"}).toLowerCase(),
 password: z.string().trim().min(6, {message: "min 6 characters"}),
 role: z.enum([userRole.member, userRole.admin]).default(userRole.member)
 }).partial() // garante que todos os parâmetros sejam opcionais 
 
-const userId = req.params.id 
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const id = paramsSchema.parse(req.params)
+
+const user = await prisma.user.findUnique({
+  where: id,
+});
+
+if (!user) {
+  throw new AppError("User not found!", 404);
+}
 
 const {name, email, password, role} = bodySchema.parse(req.body)
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
-  if (!user) {
-    throw new AppError("User not found!", 404);
-  }
 
   if (email) { 
     const userWithSameEmail = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (userWithSameEmail && userWithSameEmail.id !== userId) {
+    if (userWithSameEmail && userWithSameEmail.id !== user.id) {
       throw new AppError("This email is already in use by another user!", 409);
     }
   }
 
 const data: any = { name, email, role };
+
   if (password) {
     data.password = await hash(password, 8);
   }
 
   const updatedUser = await prisma.user.update({
-    where: { id: userId },
+    where: id,
     data, 
   });
 
@@ -93,16 +99,20 @@ const data: any = { name, email, role };
 
 async delete(req: Request, res: Response) {
 
-const userId = req.params.id
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
 
-const user = await prisma.user.findUnique({where: {id: userId}})
+const id = paramsSchema.parse(req.params)
+
+const user = await prisma.user.findUnique({where: id})
 
 if(!user) {
     throw new AppError("User not Found", 404)
 }
 
 await prisma.user.delete({
-    where: {id: userId}
+    where: id
 })
 
     res.status(204).json()
