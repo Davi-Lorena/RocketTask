@@ -7,5 +7,7 @@ const teamsController = new TeamMembersController()
 const teamMembersRoutes = Router()
 
 teamMembersRoutes.post("/", verifyAuthorization(["admin"]), teamsController.create)
+teamMembersRoutes.delete("/:id", verifyAuthorization(["admin"]), teamsController.remove)
+
 
 export { teamMembersRoutes }

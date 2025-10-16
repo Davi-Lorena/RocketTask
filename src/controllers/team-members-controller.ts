@@ -8,8 +8,8 @@ class TeamMembersController {
 async create(req: Request, res: Response) {
 
 const bodySchema = z.object({
-    userId: z.string().trim(),
-    teamId: z.string().trim()
+    userId: z.string().trim().uuid(),
+    teamId: z.string().trim().uuid()
 })
 
 const {userId, teamId} = bodySchema.parse(req.body)
@@ -45,6 +45,30 @@ await prisma.teamMembers.create({
 
 
     res.status(201).json({message: "Relationship created!", userId, teamId})
+}
+
+async remove(req: Request, res: Response) {
+
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const {id} = paramsSchema.parse(req.params)
+
+const teamMember = await prisma.teamMembers.findUnique({
+    where: {id}
+})
+
+if(!teamMember) {
+    throw new AppError("This user don't is in this team!")
+}
+
+await prisma.teamMembers.delete({
+    where: {id}
+})
+
+res.json({message: "User removed of the team"})
+
 }
 
 }
