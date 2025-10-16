@@ -55,10 +55,14 @@ password: z.string().trim().min(6, {message: "min 6 characters"}),
 role: z.enum([userRole.member, userRole.admin]).default(userRole.member)
 }).partial() // garante que todos os parâmetros sejam opcionais 
 
-const userId = req.params.id 
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const id = paramsSchema.parse(req.params)
 
 const user = await prisma.user.findUnique({
-  where: { id: userId },
+  where: id,
 });
 
 if (!user) {
@@ -73,7 +77,7 @@ const {name, email, password, role} = bodySchema.parse(req.body)
       where: { email },
     });
 
-    if (userWithSameEmail && userWithSameEmail.id !== userId) {
+    if (userWithSameEmail && userWithSameEmail.id !== user.id) {
       throw new AppError("This email is already in use by another user!", 409);
     }
   }
@@ -85,7 +89,7 @@ const data: any = { name, email, role };
   }
 
   const updatedUser = await prisma.user.update({
-    where: { id: userId },
+    where: id,
     data, 
   });
 
@@ -95,16 +99,20 @@ const data: any = { name, email, role };
 
 async delete(req: Request, res: Response) {
 
-const userId = req.params.id
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
 
-const user = await prisma.user.findUnique({where: {id: userId}})
+const id = paramsSchema.parse(req.params)
+
+const user = await prisma.user.findUnique({where: id})
 
 if(!user) {
     throw new AppError("User not Found", 404)
 }
 
 await prisma.user.delete({
-    where: {id: userId}
+    where: id
 })
 
     res.status(204).json()
