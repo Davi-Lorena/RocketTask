@@ -9,7 +9,7 @@ class TeamsController {
 async create(req: Request, res: Response) {
 
     const bodySchema = z.object({
-        name: z.string().min(5, "Mínimo 5 caractertes").max(100, "Máximo 100 caracteres").trim(),
+        name: z.string().trim().min(5, "Mínimo 5 caractertes").max(100, "Máximo 100 caracteres"),
         description: z.string().trim().optional()
     })
 
