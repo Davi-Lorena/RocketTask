@@ -6,7 +6,7 @@ import { Status } from '@prisma/client'
 import { Priority } from '@prisma/client'
 class TasksController {
 
-    async create(req: Request, res: Response) {
+async create(req: Request, res: Response) {
 
     const bodySchema = z.object({
 title: z.string().trim().min(5, "Min five characters!").max(200, "max two thousands characters!"), 
@@ -111,6 +111,51 @@ const {user, team} = querySchema.parse(req.query)
     })
     res.json(tasks)
 }
+
+async update(req: Request, res: Response) {
+
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const {id} = paramsSchema.parse(req.params)
+
+const task = await prisma.tasks.findUnique({
+    where: {id}
+})
+
+if(!task) {
+    throw new AppError("This task don't exist!")
+}
+
+const bodySchema = z.object({
+title: z.string().trim().min(5, "Min five characters!").max(200, "max two thousands characters!"), 
+description: z.string().trim().min(10, "min ten characters").max(400, "max 400 characters"),
+status: z.nativeEnum(Status).default("pending"),
+priority: z.nativeEnum(Priority).default("high"),
+assignedTo: z.string().trim().uuid(),
+teamId: z.string().trim().uuid(),
+}).partial()
+
+const { title, description, status, priority, assignedTo, teamId  } = bodySchema.parse(req.body)
+
+const updatedTask = await prisma.tasks.update({
+    where: {id},
+data: {
+title,
+description,
+status,
+priority,
+assignedTo,
+teamId
+}
+})
+
+res.json(updatedTask)
+
+}
+
+
 
 }
 

@@ -12,5 +12,9 @@ tasksRoutes.post("/",
     tasksRoutes.get("/", 
     verifyAuthorization(["admin"]), 
     tasksController.index)
+    tasksRoutes.put("/:id",
+verifyAuthorization(["admin"]),
+tasksController.update
+    )
 
 export {tasksRoutes}
