@@ -155,7 +155,21 @@ res.json(updatedTask)
 
 }
 
+async delete(req: Request, res: Response) {
 
+    const paramsSchema = z.object({
+        id: z.string().uuid()
+    })
+    
+    const {id} = paramsSchema.parse(req.params)
+
+await prisma.tasks.delete({
+    where: {id}
+})
+
+res.json({message: `Task of ID: ${id} deleted succesfully!`})
+
+}
 
 }
 

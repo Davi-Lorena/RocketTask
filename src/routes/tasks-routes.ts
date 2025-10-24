@@ -6,15 +6,18 @@ const tasksRoutes = Router()
 
 const tasksController = new TasksController()
 
-tasksRoutes.post("/", 
-    verifyAuthorization(["admin"]), 
+tasksRoutes.use(verifyAuthorization(["admin"]))
+
+tasksRoutes.post("/",  
     tasksController.create)
-    tasksRoutes.get("/", 
-    verifyAuthorization(["admin"]), 
+
+tasksRoutes.get("/", 
     tasksController.index)
+
     tasksRoutes.put("/:id",
-verifyAuthorization(["admin"]),
-tasksController.update
-    )
+tasksController.update)
+
+tasksRoutes.delete("/:id", 
+    tasksController.delete)
 
 export {tasksRoutes}
