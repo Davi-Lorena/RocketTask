@@ -11,8 +11,8 @@ class TasksController {
     const bodySchema = z.object({
 title: z.string().trim().min(5, "Min five characters!").max(200, "max two thousands characters!"), 
 description: z.string().trim().min(10, "min ten characters").max(400, "max 400 characters"),
-status: z.nativeEnum(Status),
-priority: z.nativeEnum(Priority),
+status: z.nativeEnum(Status).default("pending"),
+priority: z.nativeEnum(Priority).default("high"),
 assignedTo: z.string().trim().uuid(),
 teamId: z.string().trim().uuid(),
     })
@@ -69,6 +69,48 @@ const task = await prisma.tasks.create({
 
         res.status(201).json(task)
     }
+
+async index (req: Request, res: Response) {
+
+    const querySchema = z.object({
+user: z.string().default(""),
+team: z.string().default("")
+    }).partial()
+
+const {user, team} = querySchema.parse(req.query)
+
+
+    const tasks = await prisma.tasks.findMany({
+        where: {
+            user: {
+               name: {
+                contains: user?.trim(),
+                mode: "insensitive"
+               }
+            },
+            team: {
+                name: {
+                    contains: team?.trim(),
+                    mode: "insensitive"
+                }
+            }
+        },
+        include: {
+           user: {
+            select: {
+                name: true,
+                email: true,
+            }
+           },
+           team: {
+            select: {
+                name: true,
+            }
+           }
+        },
+    })
+    res.json(tasks)
+}
 
 }
 

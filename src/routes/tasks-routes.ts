@@ -9,5 +9,8 @@ const tasksController = new TasksController()
 tasksRoutes.post("/", 
     verifyAuthorization(["admin"]), 
     tasksController.create)
+    tasksRoutes.get("/", 
+    verifyAuthorization(["admin"]), 
+    tasksController.index)
 
 export {tasksRoutes}
