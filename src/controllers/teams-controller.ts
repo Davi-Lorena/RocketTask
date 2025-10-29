@@ -106,7 +106,42 @@ const updateTeam = await prisma.teams.update({
 res.json({ updateTeam })
 }
 
+async delete(req: Request, res: Response) {
 
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const { id } = paramsSchema.parse(req.params)
+
+const team = await prisma.teams.findUnique({
+    where: {id}
+})
+
+if(!team) {
+    throw new AppError("This team don't exist!", 404)
+}
+
+const tasks = await prisma.tasks.findFirst({
+    where: {
+        teamId: id,
+        status: {
+            not: "completed"
+        }
+    }
+})
+
+if(tasks) {
+throw new AppError("The team cannot be deleted if it has pending tasks.", 409)
+}
+
+await prisma.teams.delete({
+    where: {id}
+})
+
+res.status(204).json()
+
+}
 }
 
 
