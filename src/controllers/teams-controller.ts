@@ -142,6 +142,38 @@ await prisma.teams.delete({
 res.status(204).json()
 
 }
+
+async showTeamTasks(req: Request, res: Response) {
+
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const { id } = paramsSchema.parse(req.params)
+
+const userId = req.user?.user_id
+
+const teamWithMember = await prisma.teamMembers.findFirst({
+    where: {
+        userId: userId,
+        teamId: id
+    }
+})
+
+if(req.user?.role !== "admin" && !teamWithMember) {
+    throw new AppError("Unauthorized!", 403)
+}
+
+const teamTasks = await prisma.tasks.findMany({
+    where: {
+        teamId: id
+    }
+})
+
+res.json({ teamTasks })
+
+}
+
 }
 
 

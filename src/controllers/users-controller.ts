@@ -105,11 +105,14 @@ if(req.user?.role !== "admin" && id !== req.user?.user_id) {
 throw new AppError("You cant view your tasks and your team tasks!")
 }
 
+
 const memberTasks = await prisma.tasks.findMany({
   where: {
     assignedTo: id
   }
 })
+
+
 
 res.json({ memberTasks })
 
