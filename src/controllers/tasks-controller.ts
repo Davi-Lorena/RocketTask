@@ -109,6 +109,7 @@ const {user, team} = querySchema.parse(req.query)
            }
         },
     })
+
     res.json(tasks)
 }
 
