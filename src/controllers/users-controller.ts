@@ -26,14 +26,18 @@ const paramsSchema = z.object({
     id: z.string().uuid()
 })
 
-const id = paramsSchema.parse(req.params)
+const { id } = paramsSchema.parse(req.params)
 
 const user = await prisma.user.findUnique({
-  where: id,
+  where: { id },
 });
 
 if (!user) {
   throw new AppError("User not found!", 404);
+}
+
+if(id !== req.user?.user_id) {
+  throw new AppError("You can only update your own user!", 403);
 }
 
 const {name, email, password, role} = bodySchema.parse(req.body)
@@ -56,7 +60,7 @@ const data: any = { name, email, role };
   }
 
   const updatedUser = await prisma.user.update({
-    where: id,
+    where: {id},
     data, 
   });
 
@@ -70,16 +74,20 @@ const paramsSchema = z.object({
     id: z.string().uuid()
 })
 
-const id = paramsSchema.parse(req.params)
+const { id } = paramsSchema.parse(req.params)
 
-const user = await prisma.user.findUnique({where: id})
+if(id !== req.user?.user_id) {
+  throw new AppError("You can only delete your own user!", 403);
+}
+
+const user = await prisma.user.findUnique({where: {id}})
 
 if(!user) {
     throw new AppError("User not Found", 404)
 }
 
 await prisma.user.delete({
-    where: id
+    where: { id }
 })
 
     res.status(204).json()

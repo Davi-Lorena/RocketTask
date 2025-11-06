@@ -1,12 +1,19 @@
 import { Router } from "express";
 import { UsersController } from "@/controllers/users-controller";
+import { verifyAuthorization } from "@/middlewares/verify-authorization";
 
 const usersRoutes = Router();
 
 const usersController = new UsersController
 
-usersRoutes.get("/", usersController.index)
-usersRoutes.put("/:id", usersController.update)
+usersRoutes.get("/", 
+    verifyAuthorization(["admin"])
+    ,usersController.index)
+
+usersRoutes.put("/:id", 
+    verifyAuthorization(["member"])
+    ,usersController.update)
+
 usersRoutes.delete("/:id", usersController.delete)
 
 export {usersRoutes}
