@@ -93,6 +93,29 @@ await prisma.user.delete({
     res.status(204).json()
 }
 
+async showTasks(req: Request, res: Response) {
+
+const paramsSchema = z.object({
+  id: z.string().uuid()
+})
+
+const {id} = paramsSchema.parse(req.params)
+
+if(req.user?.role !== "admin" && id !== req.user?.user_id) {
+throw new AppError("You cant view your tasks and your team tasks!")
+}
+
+const memberTasks = await prisma.tasks.findMany({
+  where: {
+    assignedTo: id
+  }
+})
+
+res.json({ memberTasks })
+
+}
+
+
 }
 
 export { UsersController };

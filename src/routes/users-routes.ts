@@ -16,4 +16,8 @@ usersRoutes.put("/:id",
 
 usersRoutes.delete("/:id", usersController.delete)
 
+usersRoutes.get("/:id", 
+    verifyAuthorization(["admin", "member"])
+    ,usersController.showTasks)
+
 export {usersRoutes}

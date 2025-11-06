@@ -6,9 +6,8 @@ const teamsController = new TeamsController()
 
 const teamsRoutes = Router()
 
-teamsRoutes.get("/", teamsController.index)
 teamsRoutes.use(verifyAuthorization(["admin"]))
-
+teamsRoutes.get("/", teamsController.index)
 teamsRoutes.post("/", teamsController.create)
 teamsRoutes.put("/:id", teamsController.update)
 teamsRoutes.delete("/:id", 
