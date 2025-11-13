@@ -9,7 +9,7 @@ class TeamsController {
 async create(req: Request, res: Response) {
 
     const bodySchema = z.object({
-        name: z.string().min(5, "Mínimo 5 caractertes").max(100, "Máximo 100 caracteres").trim(),
+        name: z.string().trim().min(5, "Mínimo 5 caractertes").max(100, "Máximo 100 caracteres"),
         description: z.string().trim().optional()
     })
 
@@ -106,6 +106,73 @@ const updateTeam = await prisma.teams.update({
 res.json({ updateTeam })
 }
 
+async delete(req: Request, res: Response) {
+
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const { id } = paramsSchema.parse(req.params)
+
+const team = await prisma.teams.findUnique({
+    where: {id}
+})
+
+if(!team) {
+    throw new AppError("This team don't exist!", 404)
+}
+
+const tasks = await prisma.tasks.findFirst({
+    where: {
+        teamId: id,
+        status: {
+            not: "completed"
+        }
+    }
+})
+
+if(tasks) {
+throw new AppError("The team cannot be deleted if it has pending tasks.", 409)
+}
+
+await prisma.teams.delete({
+    where: {id}
+})
+
+res.status(204).json()
+
+}
+
+async showTeamTasks(req: Request, res: Response) {
+
+const paramsSchema = z.object({
+    id: z.string().uuid()
+})
+
+const { id } = paramsSchema.parse(req.params)
+
+const userId = req.user?.user_id
+
+const teamWithMember = await prisma.teamMembers.findFirst({
+    where: {
+        userId: userId,
+        teamId: id
+    }
+})
+
+if(req.user?.role !== "admin" && !teamWithMember) {
+    throw new AppError("Unauthorized!", 403)
+}
+
+const teamTasks = await prisma.tasks.findMany({
+    where: {
+        teamId: id
+    }
+})
+
+res.json({ teamTasks })
+
+}
 
 }
 
