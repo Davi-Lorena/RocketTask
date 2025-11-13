@@ -76,7 +76,7 @@ const paramsSchema = z.object({
 
 const { id } = paramsSchema.parse(req.params)
 
-if(id !== req.user?.user_id) {
+if(req.user?.role !== "admin" && id !== req.user?.user_id) {
   throw new AppError("You can only delete your own user!", 403);
 }
 
@@ -85,6 +85,23 @@ const user = await prisma.user.findUnique({where: {id}})
 if(!user) {
     throw new AppError("User not Found", 404)
 }
+
+const team = await prisma.teamMembers.findFirst({
+  where: {
+    userId: id
+  }
+})
+
+const tasks = await prisma.tasks.findMany({
+  where: {
+    assignedTo: id
+  }
+})
+
+if(tasks.length > 0 || team) {
+  throw new AppError("This user has tasks or is in a team. He cannot be delete", 400)
+}
+
 
 await prisma.user.delete({
     where: { id }

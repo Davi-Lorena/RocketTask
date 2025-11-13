@@ -63,6 +63,7 @@ if(!teamMember) {
     throw new AppError("This user don't is in this team!")
 }
 
+
 await prisma.teamMembers.delete({
     where: {id}
 })

@@ -14,7 +14,9 @@ usersRoutes.put("/:id",
     verifyAuthorization(["member"])
     ,usersController.update)
 
-usersRoutes.delete("/:id", usersController.delete)
+usersRoutes.delete("/:id", 
+    verifyAuthorization(["admin", "member"])
+    ,usersController.delete)
 
 usersRoutes.get("/:id", 
     verifyAuthorization(["admin", "member"])
