@@ -106,7 +106,8 @@ const {user, team} = querySchema.parse(req.query)
             select: {
                 name: true,
             }
-           }
+           },
+           taskHistory: true,
         },
     })
 

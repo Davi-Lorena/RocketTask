@@ -47,6 +47,16 @@ if(task.status === newStatus) {
     throw new AppError("Task is already in the desired status!", 400)
 }
 
+const statusCompleted = "completed"
+const statusRevert = ["pending", "in_progress"]
+
+if ((task.status === statusCompleted && statusRevert.includes(newStatus)) || (task.status === statusRevert[0] && newStatus === statusRevert[1])) {
+    throw new AppError(
+        `A completed task cannot revert to the status '${newStatus}'.`,
+        400
+    );
+}
+
 const [taskHistory, updatedTask] = await prisma.$transaction([
             prisma.taskHistory.create({
                 data: {
