@@ -30,7 +30,6 @@ req.user = {
     user_id
 }
 
-console.log(req.user)
 
 return next()
 
