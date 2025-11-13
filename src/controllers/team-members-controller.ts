@@ -56,13 +56,32 @@ const paramsSchema = z.object({
 const {id} = paramsSchema.parse(req.params)
 
 const teamMember = await prisma.teamMembers.findUnique({
-    where: {id}
+    where: {id},
+    include: {
+        user: true,
+        team: true
+    }
 })
 
 if(!teamMember) {
     throw new AppError("This user don't is in this team!")
 }
 
+
+const tasks = await prisma.tasks.findMany({
+    where: {
+        assignedTo: teamMember.userId,
+        teamId: teamMember.teamId,
+        status: {
+            not: "completed"
+        }
+    }
+})
+
+if(tasks.length > 0) {
+    throw new AppError("This user has pending or in-progress tasks and cannot be removed from the team.",
+            400)
+}
 
 await prisma.teamMembers.delete({
     where: {id}
