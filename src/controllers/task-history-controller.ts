@@ -7,7 +7,7 @@ import { AppError } from "@/utils/AppError"
 
 class TaskHistoryController {
 
-async update(req: Request, res: Response) {
+async updateStatus(req: Request, res: Response) {
 
 const paramsSchema = z.object({
     id: z.string().uuid()

@@ -10,7 +10,7 @@ const taskHistoryController = new TaskHistoryController()
 
 tasksRoutes.patch("/:id", 
 verifyAuthorization(["member", "admin"]),
-taskHistoryController.update
+taskHistoryController.updateStatus
 )
 
 tasksRoutes.use(verifyAuthorization(["admin"]))
