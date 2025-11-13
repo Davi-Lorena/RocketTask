@@ -34,7 +34,7 @@ role userRole @default(member)
 
 
 createdAt DateTime @default(now()) @map("created_at")
-updatedAt DateTime @default(now()) @map("updated_at")
+updatedAt DateTime @updatedAt @map("updated_at")
 
 team TeamMembers[]
 task Tasks[]
@@ -50,7 +50,7 @@ name String
 description String?
 
 createdAt DateTime @default(now()) @map("created_at")
-updatedAt DateTime @default(now()) @map("updated_at")
+updatedAt DateTime @updatedAt @map("updated_at")
 
 teamMember TeamMembers[]
 task Tasks[]
@@ -86,7 +86,7 @@ teamId String @map("team_id")
 team Teams @relation(fields: [teamId], references: [id])
 
 createdAt DateTime @default(now()) @map("created_at")
-updatedAt DateTime @default(now()) @map("updated_at")
+updatedAt DateTime @updatedAt @map("updated_at")
 
 taskHistory TaskHistory[]
 
