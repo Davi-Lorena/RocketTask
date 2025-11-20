@@ -73,14 +73,19 @@ const task = await prisma.tasks.create({
 async index (req: Request, res: Response) {
 
     const querySchema = z.object({
-user: z.string().default(""),
-team: z.string().default("")
-    }).partial()
+user: z.string().default("").optional(),
+team: z.string().default("").optional(),
+page: z.coerce.number().default(1),
+perPage: z.coerce.number().default(10)
+    })
 
-const {user, team} = querySchema.parse(req.query)
+const {user, team, perPage, page} = querySchema.parse(req.query)
 
+const skip = (page - 1) * perPage
 
     const tasks = await prisma.tasks.findMany({
+        skip,
+        take: perPage,
         where: {
             user: {
                name: {
