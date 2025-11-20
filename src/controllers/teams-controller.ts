@@ -34,7 +34,18 @@ async create(req: Request, res: Response) {
 
 async index(req: Request, res: Response) {
 
+    const querySchema = z.object({
+        page: z.coerce.number().default(1),
+        perPage: z.coerce.number().default(10)
+    })
+
+const { page, perPage } = querySchema.parse(req.query)
+
+    const skip = (page - 1 ) * perPage
+
     const teams = await prisma.teams.findMany({
+        skip,
+        take: perPage,
         include: {
             teamMember: {
                 include: {
@@ -62,6 +73,7 @@ teamData.teamMember = team.teamMember.map(member => {
         ...memberData,
     }
 })
+
 if (teamData.description === null) {
  delete teamData.description
  }
@@ -149,7 +161,16 @@ const paramsSchema = z.object({
     id: z.string().uuid()
 })
 
+const querySchema = z.object({
+        page: z.coerce.number().default(1),
+        perPage: z.coerce.number().default(10)
+    })
+
 const { id } = paramsSchema.parse(req.params)
+
+const { page, perPage} = querySchema.parse(req.query)
+
+const skip = (page - 1) * perPage
 
 const userId = req.user?.user_id
 
@@ -165,6 +186,8 @@ if(req.user?.role !== "admin" && !teamWithMember) {
 }
 
 const teamTasks = await prisma.tasks.findMany({
+        skip,
+    take: perPage,
     where: {
         teamId: id
     }
