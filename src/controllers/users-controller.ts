@@ -8,7 +8,20 @@ import { AppError } from "@/utils/AppError";
 class UsersController {
 
 async index(req: Request, res: Response) {
-const users = await prisma.user.findMany()
+
+const querySchema = z.object({
+        page: z.coerce.number().default(1),
+        perPage: z.coerce.number().default(10)
+    })
+
+const { page, perPage} = querySchema.parse(req.query)
+
+const skip = (page - 1) * perPage
+
+const users = await prisma.user.findMany({
+  skip,
+  take: perPage
+})
 
 res.json({ users })
 }
@@ -118,12 +131,23 @@ const paramsSchema = z.object({
 
 const {id} = paramsSchema.parse(req.params)
 
+const querySchema = z.object({
+        page: z.coerce.number().default(1),
+        perPage: z.coerce.number().default(10)
+    })
+
+const { page, perPage} = querySchema.parse(req.query)
+
+const skip = (page - 1) * perPage
+
 if(req.user?.role !== "admin" && id !== req.user?.user_id) {
 throw new AppError("You cant view your tasks and your team tasks!")
 }
 
 
 const memberTasks = await prisma.tasks.findMany({
+  skip,
+  take: perPage,
   where: {
     assignedTo: id
   }
